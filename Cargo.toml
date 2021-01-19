@@ -1,0 +1,16 @@
+[package]
+name = "movie-db-builder"
+version = "0.1.0"
+authors = ["richard.thomas <richard.thomas36@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+openssl = "0.10.30"
+serde = {version = "1.0.114", features = ["derive"] }
+reqwest = { version = "0.10.7", features = ["json"] }
+rusqlite = "0.24.1"
+tokio = { version = "0.2", features = ["full"] }
+dotenv = "0.15.0"
+url =  "2.2.0" 
