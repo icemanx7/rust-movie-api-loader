@@ -1,9 +1,13 @@
+extern crate dotenv;
+
 use reqwest::Error;
 use rusqlite::NO_PARAMS;
 use rusqlite::{params, Connection, Result};
 use serde::Deserialize;
 use std::env;
 use url::form_urlencoded::{byte_serialize, parse};
+
+use dotenv::dotenv;
 
 #[derive(Deserialize, Debug)]
 struct Rating {
@@ -49,8 +53,17 @@ struct Movie {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    dotenv().ok();
+
+    let apiKeyTuple: Vec<(String, String)> = (env::vars())
+        .filter(|d| d.0 == "movieAPIKey")
+        .take(1)
+        .collect();
+    println!("{:?}", apiKeyTuple[0]);
+    let apiKey = &apiKeyTuple[0].1;
+
     let conn = Connection::open("movies.db").unwrap();
-    let request_url = format!("");
+    let request_url = format!("http://www.omdbapi.com/?i=tt3896198&apikey={}", apiKey);
 
     println!("{}", request_url);
     let response = reqwest::get(&request_url).await?;
@@ -70,7 +83,7 @@ async fn main() -> Result<(), Error> {
         let movie_id = single_movie.id;
         let movie_title = single_movie.name;
 
-        call_movie_api(movie_title).await.unwrap();
+        call_movie_api(movie_title, apiKey).await.unwrap();
         // println!("Found Movie title {:?}", movie_title);
     }
 
@@ -79,22 +92,12 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn initDatabase(db_name: String) -> Result<()> {
-    let conn = Connection::open("movieDetails.db")?;
-    conn.execute(
-        "create table if not exists MovieDetails (
-             id integer primary key,
-             name text not null unique
-         )",
-        NO_PARAMS,
-    )?;
-
-    Ok(())
-}
-
-async fn call_movie_api(title: String) -> Result<(), Error> {
+async fn call_movie_api(title: String, apiKey: &String) -> Result<(), Error> {
     let clean_movie = clean_text(title);
-    let request_url = format!("", clean_movie);
+    let request_url = format!(
+        "http://www.omdbapi.com/?t={}&apikey={}",
+        clean_movie, apiKey
+    );
     println!("{}", request_url);
     let response = reqwest::get(&request_url).await;
     match response {
@@ -109,8 +112,6 @@ async fn call_movie_api(title: String) -> Result<(), Error> {
         }
     }
 
-    // let users: Movie = response.json().await.unwrap();
-    // println!("{:?}", users);
     Ok(())
 }
 
