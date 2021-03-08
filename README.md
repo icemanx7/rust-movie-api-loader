@@ -21,3 +21,5 @@ As you can see from the Movie Model Type the object is quite big and I needed to
 * Serde: JSON conversion
 * Tokio: For async operations
 * dotenv: Reading environment files where the Api Keys will be store
+
+# REMEMBER TO ADD YOUR .ENV file with the API KEY
